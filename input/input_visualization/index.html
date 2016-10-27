@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Load the Paper.js library -->
+<script type="text/javascript" src="paper-full.js"></script>
+<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+<script type="text/paperscript" canvas="myCanvas">
+	// Create a Paper.js Path to draw a line into it:
+  //origin Point
+  //GET https://api.thingspeak.com/channels/171066/feeds.json?results=2
+  var data;
+
+  function update(){
+    $.ajax({
+      url:"https://api.thingspeak.com/channels/171066/feeds.json",
+      data:{"api_key":"HJOM0XO0OB38EMY0"},
+      type:"GET",
+      dataType:"jsonp"
+    }).done(function(results){
+      data = parseData(results);
+      createPath(data);
+    });
+    console.log("update");
+  }
+
+  $.ajax({
+    url:"https://api.thingspeak.com/channels/171066/feeds.json",
+    data:{"api_key":"HJOM0XO0OB38EMY0"},
+    type:"GET",
+    dataType:"jsonp"
+  }).done(function(results){
+    data = parseData(results);
+    createPath(data);
+  });
+
+  setInterval(update,30000);
+  /*
+  setInterval(function(){
+    console.log("test")
+    $.ajax({
+      url:"https://api.thingspeak.com/channels/171066/feeds.json",
+      data:{"api_key":"HJOM0XO0OB38EMY0"},
+      type:"GET",
+      dataType:"jsonp"
+    }).done(function(results){
+      data = parseData(results);
+      createPath(data);
+    });
+    console.log("update");
+
+
+  },1000);
+*/
+
+  function parseData(data){
+    var result = "";
+    var arrayOfStrings = [];
+    if(data.feeds){
+      for(var i=0;i<data.feeds.length;i++){
+        result = result + data.feeds[i].field1;
+      }
+      var a = result.split(";");
+      for(var i=0;i<a.length;i++){
+        //split by ','
+        var s = a[i].split(",");
+        if(s.length==5&&s[3]>-90&&s[3]<90&&s[4]>-180&&s[4]<180){
+          arrayOfStrings.push(s);
+        }
+      }
+    }
+    return arrayOfStrings;
+  }
+  // .done(function(results)){
+  //   console.log(results);
+  // });
+  // var originLat = 43.106613;
+
+  // var originLon =  -77.672537;
+  // var originLon =  -77.692537;
+  //  var originLat = 43.106613;
+  // var originLon =  -77.640000;
+  var originLat = 43.120613;
+ var originLon =  -77.685000;
+  // var endLat = 43.076966;
+    var endLat = 43.076966;
+  var endLon = -77.613915;
+  var ratio = view.size.width*(originLat-40)/(originLat-endLat);
+
+  function getY(lat){
+    return view.size.width*(originLat-lat)/(originLat-endLat);
+  }
+  function getX(lon){
+    return view.size.width/(originLat-endLat)*(lon-originLon);
+  }
+
+
+
+	// Move to start and draw a line from there
+	//path.moveTo(start);
+	// Note the plus operator on Point objects.
+	// PaperScript does that for us, and much more!
+	//path.lineTo(start + [ 100, -50 ]);
+
+  var sampleObj = {latitude:43,longitude:-77,x:0,y:0,z:0};
+  var samplePoints = [
+    {latitude:43.106613,longitude:-77.672537,x:0,y:0,z:0},
+    {latitude:43.096613,longitude:-77.660208,x:0,y:0,z:0},
+    {latitude:43.086613,longitude:-77.655208,x:0,y:0,z:0},
+    {latitude:43.090613,longitude:-77.650208,x:0,y:0,z:0}
+  ];
+  //var testPath = createPath(samplePoints);
+
+  function createPath(data){
+    //var path = new Path();
+
+    var points = [];
+    for(var i=0;i<data.length;i++){
+      //var x =
+      // var point = new Point(getX(data[i][3]),getY(data[i][4])/2);
+      var point;
+      if(!(getX(data[i][4])/1.6>view.size.width||getY(data[i][3])/1.6>view.size.height)){
+        point = new Point(getX(data[i][4])/1.5,getY(data[i][3])/1.5);
+      }
+      // var point = new Point(getX(data[i][4])/1.5,getY(data[i][3])/1.5);
+      // if(getX(data[i][3])>700||getY(data[i][4])>600){
+      //   console.log(i+' '+data[i][3]+' '+data[i][4]);
+      //   console.log(getX(data[i][4])+" "+getY(data[i][3]));
+      // }
+      var circle = Path.Circle(point,6);
+      if(data[i][0]>0||data[i][1]>0){
+          var circle = Path.Circle(point,3);
+          circle.fillColor = "red";
+      }
+      // if(data[i][0]==0&&data[i][1]==0&&data[i][2]==0){
+      //   circle.fillColor = "green";
+      // }
+      if(data[i][2]>0){
+        var circle = Path.Circle(point,2);
+        circle.fillColor = "blue";
+      }
+      points.push(point);
+    }
+    var path = new Path(points);
+    path.strokeColor = "green";
+    console.log(view.size);
+    console.log(path);
+    return path;
+  }
+</script>
+</head>
+<body>
+  <div style="position:relative">
+  <img src="map.png" style="position:absolute;z-index:0;top:130px;left:50px" width="800px">
+	<canvas id="myCanvas"  style="z-index:100;position:absolute" width="800px" height="800px"></canvas>
+  </div>
+</body>
+</html>

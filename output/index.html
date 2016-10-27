@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Type an address</title>
+
+  </head>
+  <body>
+    <div style="text-align:center;padding-top:20%">
+      <input id="input" type="text" name="address" placeholder="Type an address">
+      <button id="start">start</button>
+    </div>
+
+  </body>
+<script src="jquery-3.1.1.min.js" type="text/javascript"></script>
+<script>
+  var googleGeocodingKey = "AIzaSyDxhvKWDvW2_1FiJPVptBeAdo3KcwrQMIY";
+  var address = "Rochester NY";
+  var addressRequest = "https://maps.googleapis.com/maps/api/geocode/json?address="+address+"&key="+googleGeocodingKey;
+  var stringLoc;
+  function getLocation(address){
+    $.ajax({
+      url: "https://maps.googleapis.com/maps/api/geocode/json?address="+address+"&key="+googleGeocodingKey,
+      dataType:"json",
+      data:{ get_param: 'value' }
+    }).done(function(results){
+      stringLoc = results.results[0].geometry.location.lat+","+results.results[0].geometry.location.lng;
+      console.log(stringLoc);
+
+
+       $.ajax({
+       method: "DELETE",
+       url: "https://api.thingspeak.com/channels/174681/feeds.json",
+       data: { "api_key": "8LGFDW5X9HKTXF2H"}
+     }).done(function(){
+       $.ajax({
+       method: "POST",
+       url: "https://api.thingspeak.com/update.json",
+       data: { "api_key": "1XHXBG87JPFUKVHU",
+               "field1":stringLoc
+               }
+       })
+       .done(function(results) {
+         $.ajax({
+           method: "GET",
+           url: "https://api.thingspeak.com/channels/174681/feeds.json",
+           data: { "api_key": "1XHXBG87JPFUKVHU"}
+         }).done(function(results){
+           console.log("thingspeak");
+           console.log(results.feeds[0].field1);
+         })
+
+       });
+
+
+     })
+      return results.results[0].geometry.location;
+
+    });
+  }
+  $("#start").click(function(){
+    var address = $("#input").val();
+    console.log(address);
+    getLocation(address);
+  })
+
+  function distance(lat1, lon1, lat2, lon2) {
+    var p = 0.017453292519943295;    // Math.PI / 180
+    var c = Math.cos;
+    var a = 0.5 - c((lat2 - lat1) * p)/2 +
+            c(lat1 * p) * c(lat2 * p) *
+            (1 - c((lon2 - lon1) * p))/2;
+
+    return 12742 * Math.asin(Math.sqrt(a)); // 2 * R; R = 6371 km
+  }
+  var distance0 = distance(43.101267,-77.62587,43.101302,-77.622632);
+  console.log(distance0);
+  var distance1 = distance(43.101267,-77.62587,43.101267,-77.62507);
+  console.log(distance1);
+//     var distance1 = distance(43.101267,-77.625872,43.101297,-77.62502);
+// console.log(distance1);
+/*
+  $.ajax({
+  method: "POST",
+  url: "https://api.thingspeak.com/update.json",
+  data: { "api_key": "1XHXBG87JPFUKVHU",
+          "field1":getLocation(address)
+          }
+  })
+  .done(function(results) {
+    $.ajax({
+      method: "GET",
+      url: "https://api.thingspeak.com/channels/174681/feeds.json",
+      data: { "api_key": "1XHXBG87JPFUKVHU"}
+    }).done(function(results){
+      console.log(results);
+    })
+
+  });
+*/
+
+</script>
+
+</html>
