@@ -30,4 +30,4 @@ Data read from the motions sensor and GPS are sent to thingspeak.com via Particl
 
 ####Data
 With Javascript, address of the destination location is sent to Google Geocoding API to get the latitude and longitude of that address. The latitude and longitude are upload to thingspeak.com. The photon reads this data via Webhook and uses the gps to determine the current location of the device. The current location is compared against the destination.
-![alt tag](https://raw.githubusercontent.com/wsjgithub/Considerate_driver/master/images/chart.PNG)
+![alt tag](https://raw.githubusercontent.com/wsjgithub/Considerate_driver/master/images/chart.png)
