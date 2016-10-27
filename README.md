@@ -14,3 +14,19 @@ It is a simple navigation tool. The device reads the address of a destination in
 
 ![alt tag](https://raw.githubusercontent.com/wsjgithub/Considerate_driver/master/images/IMG_0001.JPG)
 
+1.###INPUT
+###Parts used: 
+1. Motions Sensor: FLORA 9-DOF Accelerometer/Gyroscope/Magnetometer - LSM9DS0 - v1.0
+2. GPS: Adafruit Ultimate GPS Breakout - 66 channel w/10 Hz updates - Version 3
+3. LED: Adafruit NeoPixel
+
+###Data
+Data read from the motions sensor and GPS are sent to thingspeak.com via Particle Webhook. Every 15 seconds, latitude, longitude, acceleration on x, y and z axis are sent in chunks of 255 characters. (255 is the max length thingspeak.com will take for a single entry).
+
+2.OUTPUT
+###Parts used: 
+1. GPS: Adafruit Ultimate GPS Breakout - 66 channel w/10 Hz updates - Version 3
+2. LED: Adafruit NeoPixel
+
+###Data
+With Javascript, address of the destination location is sent to Google Geocoding API to get the latitude and longitude of that address. The latitude and longitude are upload to thingspeak.com. The photon reads this data via Webhook and uses the gps to determine the current location of the device. The current location is compared against the destination.
